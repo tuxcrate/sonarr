@@ -5,9 +5,10 @@ tracks:
       datasource: github-releases
       depName: Sonarr/Sonarr
       version: "4.0.20.3014"
-    aliases:
-      - "{major}"
-      - "{major}.{minor}"
+    tags:
+      - "${version}"
+      - "${major}"
+      - "${major}.${minor}"
       - latest
 
   - name: prerelease
@@ -17,6 +18,7 @@ tracks:
       depName: Sonarr/Sonarr
       version: "5.0.0.2668"
     prerelease: true
-    aliases:
-      - "{major}-prerelease"
-      - "{major}.{minor}-prerelease"
+    tags:
+      - "${version}-prerelease"
+      - "${major}-prerelease"
+      - "${major}.${minor}-prerelease"

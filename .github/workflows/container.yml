@@ -17,8 +17,9 @@ jobs:
       contents: write
       packages: write
       pull-requests: write
-    uses: tuxcrate/github-actions/.github/workflows/container.yml@main
+    uses: tuxcrate/github-actions/.github/workflows/container.yml@1183d3d5421bcd9424345c9f013cce54aadf67b6 # explicit tags
     with:
+      shared-ref: 1183d3d5421bcd9424345c9f013cce54aadf67b6
       docs-repository: tuxcrate/docs
     secrets:
       docs-token: ${{ secrets.DOCS_TOKEN }}
