@@ -10,7 +10,7 @@ tracks:
       - "{major}.{minor}"
       - latest
 
-  - name: develop
+  - name: prerelease
     baseImage: alpine:3.24.2@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6
     upstream:
       datasource: github-releases
@@ -18,7 +18,5 @@ tracks:
       version: "5.0.0.2668"
     prerelease: true
     aliases:
-      - develop
-      - preview
-    buildArgs:
-      SONARR_BRANCH: develop
+      - "{major}-prerelease"
+      - "{major}.{minor}-prerelease"
