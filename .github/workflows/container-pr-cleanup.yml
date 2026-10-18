@@ -1,0 +1,26 @@
+name: Clean up container PR previews
+
+on:
+  pull_request_target:
+    types: [closed]
+  schedule:
+    - cron: '43 3 * * *'
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: Report matching images without deleting them
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  cleanup:
+    permissions:
+      contents: read
+      packages: write
+      pull-requests: read
+    uses: tuxcrate/github-actions/.github/workflows/container-pr-cleanup.yml@main
+    with:
+      dry-run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run || false }}
