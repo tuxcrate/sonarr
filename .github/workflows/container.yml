@@ -19,6 +19,6 @@ jobs:
       pull-requests: write
     uses: tuxcrate/github-actions/.github/workflows/container.yml@main
     with:
-      website-repository: tuxcrate/website
+      docs-repository: tuxcrate/docs
     secrets:
-      website-token: ${{ secrets.WEBSITE_TOKEN }}
+      docs-token: ${{ secrets.DOCS_TOKEN }}
