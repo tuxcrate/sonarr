@@ -17,10 +17,10 @@
     {
       "matchDatasources": ["github-releases"],
       "matchPackageNames": ["Sonarr/Sonarr"],
-      "matchDepTypes": ["develop"],
+      "matchDepTypes": ["prerelease"],
       "ignoreUnstable": false,
       "respectLatest": false,
-      "prBodyNotes": ["The develop track requires an upstream GitHub prerelease with Sonarr.develop assets. Builds reject stable releases and verify both architectures before publication."]
+      "prBodyNotes": ["The prerelease track requires an upstream GitHub prerelease with Sonarr.develop assets. Builds reject stable releases and verify both architectures before publication."]
     }
   ]
 }
