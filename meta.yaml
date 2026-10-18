@@ -20,5 +20,3 @@ tracks:
     aliases:
       - "{major}-prerelease"
       - "{major}.{minor}-prerelease"
-    buildArgs:
-      SONARR_BRANCH: develop
