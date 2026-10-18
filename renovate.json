@@ -1,0 +1,26 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["github>tuxcrate/renovate-config:images"],
+  "packageRules": [
+    {
+      "matchDatasources": ["github-releases"],
+      "matchPackageNames": ["Sonarr/Sonarr"],
+      "extractVersion": "^v(?<version>[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)$",
+      "versioning": "loose"
+    },
+    {
+      "matchDatasources": ["github-releases"],
+      "matchPackageNames": ["Sonarr/Sonarr"],
+      "matchDepTypes": ["stable"],
+      "ignoreUnstable": true
+    },
+    {
+      "matchDatasources": ["github-releases"],
+      "matchPackageNames": ["Sonarr/Sonarr"],
+      "matchDepTypes": ["prerelease"],
+      "ignoreUnstable": false,
+      "respectLatest": false,
+      "prBodyNotes": ["The prerelease track requires an upstream GitHub prerelease with Sonarr.develop assets. Builds reject stable releases and verify both architectures before publication."]
+    }
+  ]
+}
