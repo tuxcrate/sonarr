@@ -18,6 +18,7 @@
       "matchDatasources": ["github-releases"],
       "matchPackageNames": ["Sonarr/Sonarr"],
       "matchDepTypes": ["prerelease"],
+      "overrideDatasource": "custom.github-prereleases",
       "ignoreUnstable": false,
       "respectLatest": false,
       "prBodyNotes": ["The prerelease track requires an upstream GitHub prerelease with Sonarr.develop assets. Builds reject stable releases and verify both architectures before publication."]
