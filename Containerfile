@@ -3,28 +3,30 @@ FROM ${BASE_IMAGE} AS download
 
 ARG APP_VERSION
 ARG TARGETARCH
-ARG UPSTREAM_PRERELEASE
-ARG UPSTREAM_URL_AMD64
-ARG UPSTREAM_SHA256_AMD64
-ARG UPSTREAM_URL_ARM64
-ARG UPSTREAM_SHA256_ARM64
 
-RUN set -eux; \
+RUN --mount=type=secret,id=github_token \
+    set -eu; \
     : "${APP_VERSION:?APP_VERSION must be set}"; \
-    apk add --no-cache ca-certificates curl; \
-    case "$UPSTREAM_PRERELEASE" in \
-        true) branch=develop ;; false) branch=main ;; \
-        *) echo "UPSTREAM_PRERELEASE must be true or false" >&2; exit 1 ;; \
-    esac; \
-    case "$TARGETARCH" in \
-        amd64) url="$UPSTREAM_URL_AMD64"; checksum="$UPSTREAM_SHA256_AMD64" ;; \
-        arm64) url="$UPSTREAM_URL_ARM64"; checksum="$UPSTREAM_SHA256_ARM64" ;; \
-        *) echo "Unsupported architecture: $TARGETARCH" >&2; exit 1 ;; \
-    esac; \
-    : "${url:?upstream asset URL must be set}" "${checksum:?upstream SHA-256 must be set}"; \
+    set --; \
+    if [ -s /run/secrets/github_token ]; then \
+        set -- --header "Authorization: Bearer $(cat /run/secrets/github_token)"; \
+    fi; \
+    apk add --no-cache ca-certificates curl jq; \
+    case "$TARGETARCH" in amd64) arch=x64 ;; arm64) arch=arm64 ;; *) exit 1 ;; esac; \
+    curl "$@" --fail --location --retry 3 \
+        "https://api.github.com/repos/Sonarr/Sonarr/releases/tags/v${APP_VERSION}" -o /tmp/release.json; \
+    jq -ce --arg suffix ".${APP_VERSION}.linux-musl-${arch}.tar.gz" \
+        '[.assets[] | select(.name | startswith("Sonarr.") and endswith($suffix))] \
+         | if length == 1 then .[0] else error("expected exactly one matching Sonarr asset") end' \
+        /tmp/release.json > /tmp/asset.json; \
+    asset="$(jq -er '.name' /tmp/asset.json)"; \
+    branch="${asset#Sonarr.}"; \
+    branch="${branch%%.*}"; \
+    digest="$(jq -er '.digest' /tmp/asset.json)"; \
+    url="$(jq -er '.browser_download_url' /tmp/asset.json)"; \
     curl --fail --location --retry 3 --proto '=https' --proto-redir '=https' \
         "$url" -o /tmp/sonarr.tar.gz; \
-    printf '%s  /tmp/sonarr.tar.gz\n' "$checksum" | sha256sum -c -; \
+    printf '%s  /tmp/sonarr.tar.gz\n' "${digest#sha256:}" | sha256sum -c -; \
     mkdir /sonarr; \
     tar -xzf /tmp/sonarr.tar.gz -C /sonarr --strip-components=1; \
     rm -rf /sonarr/Sonarr.Update; \
