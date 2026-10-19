@@ -5,6 +5,11 @@ tracks:
       datasource: github-releases
       depName: Sonarr/Sonarr
       version: "4.0.20.3014"
+    githubRelease:
+      tag: "v${version}"
+      assets:
+        amd64: "Sonarr.main.${version}.linux-musl-x64.tar.gz"
+        arm64: "Sonarr.main.${version}.linux-musl-arm64.tar.gz"
     tags:
       - "${version}"
       - "${major}"
@@ -18,6 +23,11 @@ tracks:
       depName: Sonarr/Sonarr
       version: "5.0.0.2668"
     prerelease: true
+    githubRelease:
+      tag: "v${version}"
+      assets:
+        amd64: "Sonarr.develop.${version}.linux-musl-x64.tar.gz"
+        arm64: "Sonarr.develop.${version}.linux-musl-arm64.tar.gz"
     tags:
       - "${version}-prerelease"
       - "${major}-prerelease"
