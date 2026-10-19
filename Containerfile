@@ -4,12 +4,19 @@ FROM ${BASE_IMAGE} AS download
 ARG APP_VERSION
 ARG TARGETARCH
 
-RUN set -eux; \
+RUN --mount=type=secret,id=github_release_json \
+    set -eux; \
     : "${APP_VERSION:?APP_VERSION must be set}"; \
     apk add --no-cache ca-certificates curl jq; \
     case "$TARGETARCH" in amd64) arch=x64 ;; arm64) arch=arm64 ;; *) exit 1 ;; esac; \
-    curl --fail --location --retry 3 \
-        "https://api.github.com/repos/Sonarr/Sonarr/releases/tags/v${APP_VERSION}" -o /tmp/release.json; \
+    if [ -s /run/secrets/github_release_json ]; then \
+        cp /run/secrets/github_release_json /tmp/release.json; \
+    else \
+        curl --fail --location --retry 3 \
+            "https://api.github.com/repos/Sonarr/Sonarr/releases/tags/v${APP_VERSION}" -o /tmp/release.json; \
+    fi; \
+    jq -e --arg tag "v${APP_VERSION}" \
+        '.tag_name == $tag and .draft == false and (.prerelease | type == "boolean")' /tmp/release.json; \
     jq -ce --arg suffix ".${APP_VERSION}.linux-musl-${arch}.tar.gz" \
         '[.assets[] | select(.name | startswith("Sonarr.") and endswith($suffix))] \
          | if length == 1 then .[0] else error("expected exactly one matching Sonarr asset") end' \
