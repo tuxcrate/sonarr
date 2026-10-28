@@ -16,7 +16,7 @@ tracks:
     upstream:
       datasource: github-releases
       depName: Sonarr/Sonarr
-      version: "5.0.0.2800"
+      version: "5.0.0.2838"
     prerelease: true
     tags:
       - "${version}-prerelease"
