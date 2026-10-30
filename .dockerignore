@@ -1,0 +1,8 @@
+# Keep repository metadata out of the image and release build inputs.
+.git
+.github
+README.md
+LICENSE
+renovate.json
+meta.yaml
+tests
