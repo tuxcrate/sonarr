@@ -17,8 +17,5 @@ jobs:
       contents: write
       packages: write
       pull-requests: write
-    # Validate the new hook before the shared workflow is merged into main.
-    uses: tuxcrate/github-actions/.github/workflows/container.yml@865e02eb58a02feaa7280bb5876536c2762a5531
-    with:
-      shared-ref: 865e02eb58a02feaa7280bb5876536c2762a5531
+    uses: tuxcrate/github-actions/.github/workflows/container.yml@main
     secrets: inherit
