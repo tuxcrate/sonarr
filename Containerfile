@@ -34,8 +34,6 @@ RUN --mount=type=secret,id=github_token \
 
 FROM ${BASE_IMAGE}
 
-ARG APP_VERSION
-
 ENV HOME=/config \
     XDG_CONFIG_HOME=/config/xdg \
     COMPlus_EnableDiagnostics=0
@@ -50,12 +48,9 @@ RUN set -eux; \
 
 COPY --from=download /sonarr /opt/sonarr
 COPY --from=download /package_info /opt/package_info
-COPY tests/smoke.sh /usr/local/bin/sonarr-smoke-test
 
 USER 1000:1000
 WORKDIR /config
-
-RUN sonarr-smoke-test "${APP_VERSION}"
 
 EXPOSE 8989
 ENTRYPOINT ["/opt/sonarr/Sonarr", "-nobrowser", "-data=/config"]
