@@ -65,13 +65,36 @@ if [[ $installed_version != "$version" ]]; then
     exit 1
 fi
 phase='checking package version and the Tuxcrate author link in the status API'
-system_status=$(docker exec "$container" sh -eu -c '
-    api_key=$(sed -n "s:.*<ApiKey>\(.*\)</ApiKey>.*:\1:p" /config/config.xml)
-    test -n "$api_key"
-    wget -T 5 -q -O - --header "X-Api-Key: $api_key" http://127.0.0.1:8989/api/v3/system/status
-')
-grep -Eq '"packageVersion"[[:space:]]*:[[:space:]]*"'"${package_version//./\\.}"'"' <<< "$system_status"
-grep -Eq '"packageAuthor"[[:space:]]*:[[:space:]]*"\[Tuxcrate\]\(https://tuxcrate\.com\)"' <<< "$system_status"
+for attempt in 1 2 3 4; do
+    if system_status=$(docker exec "$container" sh -eu -c '
+        api_key=$(sed -n "s:.*<ApiKey>\(.*\)</ApiKey>.*:\1:p" /config/config.xml)
+        if [ -z "$api_key" ]; then
+            echo "Generated status API key is not yet available." >&2
+            exit 1
+        fi
+        wget -T 10 -O - --header "X-Api-Key: $api_key" http://127.0.0.1:8989/api/v3/system/status
+    '); then
+        break
+    else
+        request_status=$?
+        printf 'Status API request %s/4 failed (exit status %s).\n' "$attempt" "$request_status" >&2
+    fi
+    if ((attempt == 4)); then
+        echo 'Status API remained unavailable after four requests.' >&2
+        exit 1
+    fi
+    sleep 2
+done
+if ! grep -Eq '"packageVersion"[[:space:]]*:[[:space:]]*"'"${package_version//./\\.}"'"' <<< "$system_status"; then
+    printf 'Expected packageVersion %s; status API returned:\n' "$package_version" >&2
+    grep -Eo '"packageVersion"[[:space:]]*:[[:space:]]*("[^"]*"|null)' <<< "$system_status" >&2 || echo 'packageVersion field missing or invalid.' >&2
+    exit 1
+fi
+if ! grep -Eq '"packageAuthor"[[:space:]]*:[[:space:]]*"\[Tuxcrate\]\(https://tuxcrate\.com\)"' <<< "$system_status"; then
+    echo 'Expected packageAuthor [Tuxcrate](https://tuxcrate.com); status API returned:' >&2
+    grep -Eo '"packageAuthor"[[:space:]]*:[[:space:]]*("[^"]*"|null)' <<< "$system_status" >&2 || echo 'packageAuthor field missing or invalid.' >&2
+    exit 1
+fi
 
 phase='checking graceful shutdown'
 docker stop --time 30 "$container" > /dev/null
