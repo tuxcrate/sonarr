@@ -42,8 +42,8 @@ ENV HOME=/config \
 RUN set -eux; \
     apk upgrade --no-cache; \
     apk add --no-cache ca-certificates icu-data-full icu-libs libgcc libstdc++ libssl3 sqlite-libs tzdata zlib; \
-    addgroup -g 1000 tuxcreate; \
-    adduser -D -u 1000 -G tuxcreate -h /config -s /sbin/nologin tuxcreate; \
+    addgroup -g 1000 tuxcrate; \
+    adduser -D -u 1000 -G tuxcrate -h /config -s /sbin/nologin tuxcrate; \
     mkdir -p /config /data; \
     chown 1000:1000 /config /data
 

@@ -29,7 +29,10 @@ container=$(docker create --pull=never --platform "$platform" --network none \
 docker start "$container" > /dev/null
 phase='checking runtime prerequisites as the configured user'
 docker exec "$container" sh -eu -c '
-    test "$(id -u)" -ne 0
+    test "$(id -u)" = 1000
+    test "$(id -g)" = 1000
+    test "$(id -un)" = tuxcrate
+    test "$(id -gn)" = tuxcrate
     test ! -w /opt/sonarr
     test -w /config
     test ! -e /usr/local/bin/sonarr-smoke-test
