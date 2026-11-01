@@ -65,7 +65,7 @@ if [[ $installed_version != "$version" ]]; then
     exit 1
 fi
 phase='checking package version and the Tuxcrate author link in the status API'
-for attempt in 1 2 3 4; do
+for attempt in {1..4}; do
     if system_status=$(docker exec "$container" sh -eu -c '
         api_key=$(sed -n "s:.*<ApiKey>\(.*\)</ApiKey>.*:\1:p" /config/config.xml)
         if [ -z "$api_key" ]; then
