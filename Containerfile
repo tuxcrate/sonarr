@@ -2,6 +2,7 @@ ARG BASE_IMAGE
 FROM ${BASE_IMAGE} AS download
 
 ARG APP_VERSION
+ARG PACKAGE_VERSION
 ARG TARGETARCH
 
 RUN --mount=type=secret,id=github_token \
@@ -30,7 +31,7 @@ RUN --mount=type=secret,id=github_token \
     mkdir /sonarr; \
     tar -xzf /tmp/sonarr.tar.gz -C /sonarr --strip-components=1; \
     rm -rf /sonarr/Sonarr.Update; \
-    printf 'UpdateMethod=docker\nBranch=%s\nPackageAuthor=[Tuxcrate](https://tuxcrate.com)\n' "$branch" > /package_info
+    printf 'UpdateMethod=docker\nBranch=%s\nPackageVersion=%s\nPackageAuthor=[Tuxcrate](https://tuxcrate.com)\n' "$branch" "${PACKAGE_VERSION:-${APP_VERSION}-local}" > /package_info
 
 FROM ${BASE_IMAGE}
 
@@ -46,11 +47,12 @@ RUN set -eux; \
     mkdir -p /config /data; \
     chown 1000:1000 /config /data
 
-COPY --from=download /sonarr /opt/sonarr
-COPY --from=download /package_info /opt/package_info
+# Sonarr only reads ../package_info when its application directory is named bin.
+COPY --from=download /sonarr /opt/sonarr/bin
+COPY --from=download /package_info /opt/sonarr/package_info
 
 USER 1000:1000
 WORKDIR /config
 
 EXPOSE 8989
-ENTRYPOINT ["/opt/sonarr/Sonarr", "-nobrowser", "-data=/config"]
+ENTRYPOINT ["/opt/sonarr/bin/Sonarr", "-nobrowser", "-data=/config"]
