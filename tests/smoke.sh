@@ -5,7 +5,6 @@ image=${1:?A locally loaded image is required}
 version=${2:?The expected application version is required}
 platform=${3:?The image platform is required}
 package_version=${PACKAGE_VERSION:-${version}-local}
-command -v jq > /dev/null || { echo 'jq is required on the smoke-test host.' >&2; exit 1; }
 container=
 phase='starting the container with its default entrypoint and user'
 cleanup() {
