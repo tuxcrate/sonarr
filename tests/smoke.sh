@@ -5,6 +5,7 @@ image=${1:?A locally loaded image is required}
 version=${2:?The expected application version is required}
 platform=${3:?The image platform is required}
 package_version=${PACKAGE_VERSION:-${version}-local}
+command -v jq > /dev/null || { echo 'jq is required on the smoke-test host.' >&2; exit 1; }
 container=
 phase='starting the container with its default entrypoint and user'
 cleanup() {
@@ -85,14 +86,11 @@ for attempt in 1 2 3 4; do
     fi
     sleep 2
 done
-if ! grep -Eq '"packageVersion"[[:space:]]*:[[:space:]]*"'"${package_version//./\\.}"'"' <<< "$system_status"; then
-    printf 'Expected packageVersion %s; status API returned:\n' "$package_version" >&2
-    grep -Eo '"packageVersion"[[:space:]]*:[[:space:]]*("[^"]*"|null)' <<< "$system_status" >&2 || echo 'packageVersion field missing or invalid.' >&2
-    exit 1
-fi
-if ! grep -Eq '"packageAuthor"[[:space:]]*:[[:space:]]*"\[Tuxcrate\]\(https://tuxcrate\.com\)"' <<< "$system_status"; then
-    echo 'Expected packageAuthor [Tuxcrate](https://tuxcrate.com); status API returned:' >&2
-    grep -Eo '"packageAuthor"[[:space:]]*:[[:space:]]*("[^"]*"|null)' <<< "$system_status" >&2 || echo 'packageAuthor field missing or invalid.' >&2
+package_author='[Tuxcrate](https://tuxcrate.com)'
+if ! jq -e --arg version "$package_version" --arg author "$package_author" \
+    '.packageVersion == $version and .packageAuthor == $author' <<< "$system_status" > /dev/null; then
+    printf 'Expected packageVersion=%s and packageAuthor=%s; status API returned:\n' "$package_version" "$package_author" >&2
+    jq '{packageVersion, packageAuthor}' <<< "$system_status" >&2 || echo 'Status API response is not a valid metadata object.' >&2
     exit 1
 fi
 
